@@ -3,8 +3,10 @@ from typing import Dict, Iterable
 import numpy as np
 import pandas as pd
 
+from .constants import DEFAULT_PSI_BUCKETS
 
-def compute_psi(base: np.ndarray, target: np.ndarray, buckets: int = 10) -> float:
+
+def compute_psi(base: np.ndarray, target: np.ndarray, buckets: int = DEFAULT_PSI_BUCKETS) -> float:
     """
     Population Stability Index between two numeric distributions.
     """
@@ -27,7 +29,7 @@ def frame_psi(
     base_df: pd.DataFrame,
     target_df: pd.DataFrame,
     cols: Iterable[str],
-    buckets: int = 10,
+    buckets: int = DEFAULT_PSI_BUCKETS,
 ) -> Dict[str, float]:
     """PSI per selected feature."""
     scores = {}
@@ -37,8 +39,13 @@ def frame_psi(
 
 
 def time_slice(df: pd.DataFrame, time_col: str = "Month_idx", split: int = 6) -> Dict[str, pd.DataFrame]:
-    """
-    Split dataframe into early vs late slices to approximate temporal drift checks.
+    """Split a panel into ``early`` and ``late`` windows for drift checks.
+
+    Returns ``{"early": rows with time_col <= split, "late": rows with
+    time_col > split}``. The default ``split=6`` assumes the input covers
+    twelve months indexed 1..12 (the public Credit_Score dataset
+    convention), giving the natural mid-point cutoff. Pass an explicit
+    ``split`` when working with shorter or longer panels.
     """
     early = df[df[time_col] <= split]
     late = df[df[time_col] > split]

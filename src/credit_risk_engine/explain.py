@@ -47,8 +47,16 @@ def archetype_profiles(
     high_pct: float = 0.2,
     low_pct: float = 0.2,
 ) -> Dict[str, pd.Series]:
-    """
-    Summarize typical feature contributions for high/low risk cohorts.
+    """Summarize average absolute SHAP contributions for risk archetypes.
+
+    Splits the population by ``y_scores`` (typically the predicted PD) and
+    averages ``|shap_value|`` per feature within each cohort:
+
+    - ``high_pct`` (default 0.2): top fraction by ``y_scores`` -> "high_risk"
+    - ``low_pct``  (default 0.2): bottom fraction by ``y_scores`` -> "low_risk"
+
+    Useful for narrative explanations such as "which features dominate the
+    PD signal for the riskiest 20% of customers".
     """
     order = np.argsort(y_scores)
     n = len(y_scores)

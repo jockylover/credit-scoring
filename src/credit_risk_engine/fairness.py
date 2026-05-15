@@ -3,26 +3,23 @@ from typing import Dict, Iterable
 import numpy as np
 import pandas as pd
 
+from .constants import AGE_BUCKETS, AGE_BUCKET_LABELS, DEFAULT_PD_THRESHOLDS
+
 
 def age_to_bucket(age: float) -> str:
     if pd.isna(age):
         return "Unknown"
-    if age < 25:
-        return "<25"
-    if age < 35:
-        return "25-34"
-    if age < 45:
-        return "35-44"
-    if age < 55:
-        return "45-54"
-    return "55+"
+    for upper, label in zip(AGE_BUCKETS[1:], AGE_BUCKET_LABELS):
+        if age < upper:
+            return label
+    return AGE_BUCKET_LABELS[-1]
 
 
 def group_fairness_metrics(
     df: pd.DataFrame,
     pd_scores: np.ndarray,
     group_col: str = "Age",
-    thresholds: Iterable[float] = (0.3, 0.4, 0.5, 0.6),
+    thresholds: Iterable[float] = DEFAULT_PD_THRESHOLDS,
 ) -> pd.DataFrame:
     """
     Compute group-level PD means and approval/rejection rates for a set of thresholds.

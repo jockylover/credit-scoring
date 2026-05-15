@@ -35,6 +35,13 @@ DEFAULT_DROP_COLUMNS = ("ID", "Customer_ID", "Name", "SSN", "Month", "Month_idx"
 
 
 def ks_statistic(y_true: np.ndarray, y_score: np.ndarray) -> float:
+    """Kolmogorov-Smirnov separation between positives and negatives.
+
+    Defined as max(TPR - FPR) along the ROC curve. Widely used in credit
+    scoring as a single-number summary of how well a probability of default
+    score separates defaulters from non-defaulters; values above ~0.30
+    are typically considered acceptable for retail PD models.
+    """
     fpr, tpr, _ = roc_curve(y_true, y_score)
     return float(np.max(tpr - fpr))
 
@@ -208,6 +215,15 @@ def _fit_single_model(
 
 
 def build_model_zoo(random_state: int = 42) -> Dict[str, object]:
+    """Return the default suite of classifiers compared by ``benchmark_classifiers``.
+
+    The returned mapping holds eight estimators spanning a linear baseline
+    (LogisticRegression), tree models (DecisionTree, RandomForest,
+    ExtraTrees), boosted ensembles (GradientBoosting, AdaBoost, XGBoost) and
+    a distance-based learner (KNN). Hyperparameters are tuned for tabular
+    credit data with mild class imbalance; pass a custom dict to
+    ``benchmark_classifiers(model_zoo=...)`` to override.
+    """
     return {
         "LogisticRegression": LogisticRegression(max_iter=800),
         "DecisionTree": DecisionTreeClassifier(
@@ -257,6 +273,16 @@ def benchmark_classifiers(
     random_state: int = 42,
     sample_weight: Optional[np.ndarray] = None,
 ) -> BenchmarkResult:
+    """Train every classifier in the zoo and pick a champion.
+
+    Splits ``df`` once into train/validation using stratified sampling, fits
+    each pipeline (preprocessing + estimator), and returns evaluation
+    metrics for each model plus the chosen champion.
+
+    Champion selection order: macro-F1 (descending) > one-vs-rest macro AUC
+    > overall accuracy. Macro-F1 is preferred to keep the minority "Poor"
+    class influential when classes are imbalanced.
+    """
     X, y, class_labels, num_cols, cat_cols = _prepare_xy(
         df=df,
         label_col=label_col,

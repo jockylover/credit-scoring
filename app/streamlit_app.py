@@ -13,10 +13,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.append(str(SRC))
 
-from credit_risk_lab import data_prep, explain, features, model as credit_model, stress
+from credit_risk_engine import data_prep, explain, features, model as credit_model, stress
 
 
-st.set_page_config(page_title="Credit Risk Analytics Workbench", layout="wide")
+st.set_page_config(page_title="Credit Risk Engine", layout="wide")
 
 
 @st.cache_resource
@@ -65,7 +65,7 @@ def show_shap(model, record_df: pd.DataFrame):
     st.table(contributions.tail(3).reset_index().rename(columns={"index": "feature", 0: "impact"}))
 
 
-st.title("Credit Risk Analytics Workbench")
+st.title("Credit Risk Engine")
 st.markdown("Single-case scoring + multiclass risk view + scenario stress")
 
 with st.sidebar:

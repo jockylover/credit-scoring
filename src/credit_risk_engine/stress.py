@@ -4,6 +4,8 @@ from typing import Dict, Iterable, Mapping
 import numpy as np
 import pandas as pd
 
+from .constants import DEFAULT_LGD, DEFAULT_N_SIMS
+
 
 SCENARIOS: Mapping[str, Dict[str, float]] = {
     "baseline": {"multiplier": 1.0, "logit_shift": 0.0},
@@ -19,7 +21,19 @@ def _logistic_shift(p: np.ndarray, shift: float) -> np.ndarray:
 
 
 def adjust_pd(pd_series: np.ndarray, multiplier: float = 1.0, logit_shift: float = 0.0) -> np.ndarray:
-    """Apply multiplier or logit shift to PDs."""
+    """Apply a stress adjustment to a vector of probabilities of default.
+
+    Two adjustment styles, both clipped to ``[1e-5, 0.999]``:
+
+    - ``multiplier`` (default 1.0): naive proportional scaling. Useful for
+      simulating "the whole portfolio gets X% riskier" assumptions.
+    - ``logit_shift`` (default 0.0): adds the shift on the log-odds scale,
+      preserving the bounded shape near 0 and 1. Closer to how regulators
+      describe macro stress (e.g. a +0.5 logit shift roughly doubles PD
+      near the population mean while leaving extreme PDs intact).
+
+    When ``logit_shift != 0`` it takes precedence over ``multiplier``.
+    """
     adjusted = pd_series * multiplier
     if logit_shift != 0:
         adjusted = _logistic_shift(pd_series, logit_shift)
@@ -40,8 +54,8 @@ class PortfolioResult:
 def simulate_losses(
     pd_series: np.ndarray,
     ead: np.ndarray,
-    lgd: float = 0.45,
-    n_sims: int = 3000,
+    lgd: float = DEFAULT_LGD,
+    n_sims: int = DEFAULT_N_SIMS,
     seed: int = 42,
 ) -> np.ndarray:
     """
@@ -74,8 +88,8 @@ def run_scenarios(
     pd_series: np.ndarray,
     ead: np.ndarray,
     scenarios: Mapping[str, Dict[str, float]] = SCENARIOS,
-    lgd: float = 0.45,
-    n_sims: int = 3000,
+    lgd: float = DEFAULT_LGD,
+    n_sims: int = DEFAULT_N_SIMS,
     seed: int = 42,
 ) -> pd.DataFrame:
     """Apply stress scenarios to PDs and simulate portfolio losses."""

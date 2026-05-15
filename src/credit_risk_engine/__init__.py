@@ -1,6 +1,6 @@
 """
-Credit Risk Analytics Workbench
--------------------------------
+Credit Risk Engine
+------------------
 
 Modular toolkit for credit scoring with dynamic features, reject inference,
 portfolio stress testing, explainability, and model benchmarking.

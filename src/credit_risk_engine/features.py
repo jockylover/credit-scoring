@@ -3,6 +3,8 @@ from typing import Iterable, Sequence
 import numpy as np
 import pandas as pd
 
+from .constants import AGE_BUCKETS, AGE_BUCKET_LABELS
+
 
 def add_ratio_features(df: pd.DataFrame) -> pd.DataFrame:
     """Point-in-time ratios that are useful in credit scoring."""
@@ -66,8 +68,8 @@ def add_flags(df: pd.DataFrame) -> pd.DataFrame:
         df["Age"] = pd.to_numeric(df["Age"], errors="coerce")
     df["age_bucket"] = pd.cut(
         df["Age"],
-        bins=[0, 25, 35, 45, 55, 120],
-        labels=["<25", "25-35", "35-45", "45-55", "55+"],
+        bins=AGE_BUCKETS,
+        labels=AGE_BUCKET_LABELS,
         include_lowest=True,
     )
     df["income_bucket"] = pd.qcut(df["Annual_Income"], q=5, duplicates="drop", labels=False)

@@ -1,5 +1,5 @@
 """
-Train the Credit Risk Analytics Workbench pipeline and generate
+Train the Credit Risk Engine pipeline and generate
 multiclass model benchmarks plus risk diagnostics.
 """
 import argparse
@@ -16,7 +16,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.append(str(SRC))
 
-from credit_risk_lab import data_prep, explain, fairness, features, model, stability, stress
+from credit_risk_engine import data_prep, explain, fairness, features, model, stability, stress
 
 
 def parse_args() -> argparse.Namespace:
